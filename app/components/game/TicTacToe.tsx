@@ -50,7 +50,7 @@ const TicTacToe = () => {
   }
 
   const makeMove = async (index: number): Promise<void> => {
-    if (board[index] !== " " || isLoading) return;
+    if (board[index] !== " " || isLoading || isGameOver) return;
     
     setIsLoading(true);
     try {
