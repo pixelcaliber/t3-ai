@@ -30,7 +30,25 @@ const TicTacToe = () => {
     }
   };
 
-  const makeMove = async (index) => {
+  interface GameState {
+    board: string[];
+    result?: string;
+    scoreboard: Scoreboard;
+  }
+
+  interface Scoreboard {
+    human: number;
+    ai: number;
+    draw: number;
+  }
+
+  interface MoveResponse {
+    board: string[];
+    message: string;
+    scoreboard?: Scoreboard;
+  }
+
+  const makeMove = async (index: number): Promise<void> => {
     if (board[index] !== " " || isLoading) return;
     
     setIsLoading(true);
@@ -41,7 +59,7 @@ const TicTacToe = () => {
         body: JSON.stringify({ move: index })
       });
       
-      const data = await response.json();
+      const data: MoveResponse = await response.json();
       setBoard(data.board);
       setMessage(data.message);
       if (data.scoreboard) setScoreboard(data.scoreboard);
@@ -64,7 +82,7 @@ const TicTacToe = () => {
     setIsLoading(false);
   };
 
-  const getCellColor = (value) => {
+  const getCellColor = (value: string): string => {
     switch (value) {
       case 'X': return 'bg-blue-500 text-white';
       case 'O': return 'bg-red-500 text-white';
