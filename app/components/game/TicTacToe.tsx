@@ -8,21 +8,57 @@ import { Button } from '@/app/components/ui/button';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+interface GameState {
+  board: string[];
+  result?: string;
+  scoreboard: Scoreboard;
+}
+
+interface Scoreboard {
+  human: number;
+  ai: number;
+  draw: number;
+}
+
+interface MoveResponse {
+  board: string[];
+  message: string;
+  scoreboard?: Scoreboard;
+}
+
 const TicTacToe = () => {
   const [board, setBoard] = useState(Array(9).fill(" "));
   const [message, setMessage] = useState("");
-  const [scoreboard, setScoreboard] = useState({ human: 0, ai: 0, draw: 0 });
+  const [scoreboard, setScoreboard] = useState<Scoreboard>({ human: 0, ai: 0, draw: 0 });
   const [isLoading, setIsLoading] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [sessionId, setSessionId] = useState("");
 
+  // Generate and store session id
   useEffect(() => {
-    fetchGameState();
+    let storedSessionId = localStorage.getItem("sessionId");
+    if (!storedSessionId) {
+      // Generate a new session id (using crypto.randomUUID if available)
+      storedSessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+      localStorage.setItem("sessionId", storedSessionId);
+    }
+    setSessionId(storedSessionId);
+    fetchGameState(storedSessionId);
   }, []);
 
-  const fetchGameState = async () => {
+  // Delete session when the user leaves the page
+  useEffect(() => {
+    const handleUnload = () => {
+      navigator.sendBeacon(`${API_URL}/delete_session?session_id=${sessionId}`);
+    };
+    window.addEventListener("unload", handleUnload);
+    return () => window.removeEventListener("unload", handleUnload);
+  }, [sessionId]);
+
+  const fetchGameState = async (sessionId: string) => {
     try {
-      const response = await fetch(`${API_URL}/game`);
-      const data = await response.json();
+      const response = await fetch(`${API_URL}/game?session_id=${sessionId}`);
+      const data: GameState = await response.json();
       setBoard(data.board);
       setMessage(data.result ? data.result.toUpperCase() : "");
       setScoreboard(data.scoreboard);
@@ -30,24 +66,6 @@ const TicTacToe = () => {
       setMessage("Error connecting to server");
     }
   };
-
-  interface GameState {
-    board: string[];
-    result?: string;
-    scoreboard: Scoreboard;
-  }
-
-  interface Scoreboard {
-    human: number;
-    ai: number;
-    draw: number;
-  }
-
-  interface MoveResponse {
-    board: string[];
-    message: string;
-    scoreboard?: Scoreboard;
-  }
 
   const makeMove = async (index: number): Promise<void> => {
     if (board[index] !== " " || isLoading || isGameOver) return;
@@ -57,7 +75,7 @@ const TicTacToe = () => {
       const response = await fetch(`${API_URL}/move`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ move: index })
+        body: JSON.stringify({ move: index, session_id: sessionId })
       });
       
       const data: MoveResponse = await response.json();
@@ -76,7 +94,7 @@ const TicTacToe = () => {
   const resetGame = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/reset`);
+      const response = await fetch(`${API_URL}/reset?session_id=${sessionId}`);
       const data = await response.json();
       setBoard(data.board);
       setMessage(data.message);
