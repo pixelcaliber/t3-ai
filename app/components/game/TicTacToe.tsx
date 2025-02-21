@@ -13,6 +13,7 @@ const TicTacToe = () => {
   const [message, setMessage] = useState("");
   const [scoreboard, setScoreboard] = useState({ human: 0, ai: 0, draw: 0 });
   const [isLoading, setIsLoading] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   useEffect(() => {
     fetchGameState();
@@ -63,6 +64,9 @@ const TicTacToe = () => {
       setBoard(data.board);
       setMessage(data.message);
       if (data.scoreboard) setScoreboard(data.scoreboard);
+      if (data.message.includes("wins") || data.message.includes("draw")) {
+        setIsGameOver(true);
+      }
     } catch (error) {
       setMessage("Error making move");
     }
@@ -76,6 +80,7 @@ const TicTacToe = () => {
       const data = await response.json();
       setBoard(data.board);
       setMessage(data.message);
+      setIsGameOver(false);
     } catch (error) {
       setMessage("Error resetting game");
     }
