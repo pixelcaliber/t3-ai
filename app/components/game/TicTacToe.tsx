@@ -91,6 +91,24 @@ const TicTacToe = () => {
     setIsLoading(false);
   };
 
+  const resetScore = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/delete_session?session_id=${sessionId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      setBoard(Array(9).fill(" "));
+      setMessage("Score reset!");
+      setScoreboard({ human: 0, ai: 0, draw: 0 });
+      setIsGameOver(false);
+    } catch (error) {
+      setMessage("Error resetting game");
+    }
+    setIsLoading(false);
+  };
+
   const resetGame = async () => {
     setIsLoading(true);
     try {
@@ -146,6 +164,15 @@ const TicTacToe = () => {
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Reset Game
+        </Button>
+
+        <Button 
+          onClick={resetScore} 
+          disabled={isLoading}
+          className="w-full mb-4 bg-cyan-500 hover:bg-cyan-600"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Reset Score
         </Button>
 
         <Card className="bg-gray-50">
