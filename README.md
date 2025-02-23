@@ -1,6 +1,6 @@
 # Tic Tac Toe vs AI with Q-Learning
 
-This project is a full-fledged web application built using Python Flask (backend) and a React/Next.js frontend. It allows users to play a game of Tic Tac Toe against an AI powered by a Q-learning agent. The application supports multiple users simultaneously by isolating each game session with unique session IDs and includes rate limiting to prevent abuse.
+This project is a full-fledged web application built using Python Flask (backend) and a React/Next.js frontend. It allows users to play a game of Tic Tac Toe against an AI powered by a Q-learning agent. The application supports multiple users simultaneously by isolating each game session with unique session IDs and includes rate limiting to prevent abuse. It replays each game and apply bellman equation to readjust weights and improve from its gameplay through reinforcement learning.
 
 ## Table of Contents
 
